@@ -1,7 +1,3 @@
-// This file's entire job is to print a report to the terminal, so the
-// avoid_print lint (meant for library/production code) doesn't apply here.
-// ignore_for_file: avoid_print
-
 import 'data.dart';
 import 'models.dart';
 import 'catalogue.dart';
@@ -17,7 +13,7 @@ void main() {
 
   final books = library.items.whereType<Book>().toList();
 
-  print('--- Level 4: Collections ---');
+  print('Level 4: Collections');
   print('All titles: ${library.allTitles.toList()}');
   print(
     'Books after 2010: ${library.booksAfter2010.map((b) => b.title).toList()}',
