@@ -24,13 +24,13 @@ class FakeApi {
 
   final bool empty;
   int calls = 0;
-  int saves = 0;
+  static int saves = 0;
 
   Future<List<Student>> fetchStudents() async {
     calls++;
     debugPrint('fetchStudents #$calls');
     await Future.delayed(const Duration(seconds: 2));
-    if (calls % 1 == 0) {
+    if (calls % 3 == 0) {
       throw NoConnectionException();
     }
     return empty ? const [] : _seed;

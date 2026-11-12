@@ -43,6 +43,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
   }
 
   Future<void> _save() async {
+    debugPrint('Save pressed');
     setState(() => _saving = true);
     try {
       await _api.save(_students!.length);
