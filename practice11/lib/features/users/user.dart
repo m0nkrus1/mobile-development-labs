@@ -4,17 +4,17 @@ class Geo {
   const Geo({required this.lat, required this.lng});
 
   factory Geo.fromJson(Map<String, dynamic> json) => Geo(
-    lat: double.parse(json['lat'] as String),
-    lng: double.parse(json['lng'] as String),
-  );
+        lat: double.parse(json['lat'] as String),
+        lng: double.parse(json['lng'] as String),
+      );
 
   final double lat;
   final double lng;
 
   Map<String, dynamic> toJson() => {
-    'lat': lat.toString(),
-    'lng': lng.toString(),
-  };
+        'lat': lat.toString(),
+        'lng': lng.toString(),
+      };
 }
 
 class Address {
@@ -27,12 +27,12 @@ class Address {
   });
 
   factory Address.fromJson(Map<String, dynamic> json) => Address(
-    street: json['street'] as String,
-    suite: json['suite'] as String,
-    city: json['city'] as String,
-    zipcode: json['zipcode'] as String,
-    geo: Geo.fromJson(json['geo'] as Map<String, dynamic>),
-  );
+        street: json['street'] as String,
+        suite: json['suite'] as String,
+        city: json['city'] as String,
+        zipcode: json['zipcode'] as String,
+        geo: Geo.fromJson(json['geo'] as Map<String, dynamic>),
+      );
 
   final String street;
   final String suite;
@@ -41,12 +41,12 @@ class Address {
   final Geo geo;
 
   Map<String, dynamic> toJson() => {
-    'street': street,
-    'suite': suite,
-    'city': city,
-    'zipcode': zipcode,
-    'geo': geo.toJson(),
-  };
+        'street': street,
+        'suite': suite,
+        'city': city,
+        'zipcode': zipcode,
+        'geo': geo.toJson(),
+      };
 }
 
 class User {
@@ -90,15 +90,18 @@ class User {
   String get phoneDigits => phone.replaceAll(RegExp(r'[^0-9+]'), '');
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'username': username,
-    'email': email,
-    'phone': phone,
-    'website': website,
-    'address': address.toJson(),
-    'company': {'name': company.name, 'catchPhrase': company.catchPhrase},
-  };
+        'id': id,
+        'name': name,
+        'username': username,
+        'email': email,
+        'phone': phone,
+        'website': website,
+        'address': address.toJson(),
+        'company': {
+          'name': company.name,
+          'catchPhrase': company.catchPhrase,
+        },
+      };
 
   @override
   bool operator ==(Object other) => other is User && other.id == id;

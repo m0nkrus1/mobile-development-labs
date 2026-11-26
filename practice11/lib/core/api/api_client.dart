@@ -6,65 +6,29 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-import '../storage/secure_store.dart';
-
-sealed class ApiException implements Exception {
-  const ApiException();
-}
-
-class NoConnectionException extends ApiException {
-  const NoConnectionException();
-}
-
-class ServerException extends ApiException {
-  const ServerException(this.status);
-  final int status;
-}
-
-class NotFoundException extends ApiException {
-  const NotFoundException();
-}
-
-class UnauthorizedException extends ApiException {
-  const UnauthorizedException();
-}
-
-class BadResponseException extends ApiException {
-  const BadResponseException([this.detail]);
-  final String? detail;
-}
+import 'api_exception.dart';
 
 class ApiClient {
-  ApiClient(
-    this._client,
-    this._store, {
-    this.host = 'jsonplaceholder.typicode.com',
-  });
+  ApiClient(this._client, {this.host = 'jsonplaceholder.typicode.com'});
 
   final http.Client _client;
-  final SecureStore _store;
   final String host;
 
-  Future<Map<String, String>> _headers() async => {
-    'Accept': 'application/json',
-    if (await _store.readToken() case final t?) 'Authorization': 'Bearer $t',
-  };
+  Map<String, String> get _headers => const {'Accept': 'application/json'};
 
   Future<http.Response> get(String path, [Map<String, String>? query]) async {
-    final headers = await _headers();
     final r = await _send(
-      () => _client.get(Uri.https(host, path, query), headers: headers),
+      () => _client.get(Uri.https(host, path, query), headers: _headers),
     );
     _check(r);
     return r;
   }
 
   Future<http.Response> post(String path, Object body) async {
-    final headers = await _headers();
     final r = await _send(
       () => _client.post(
         Uri.https(host, path),
-        headers: {...headers, 'Content-Type': 'application/json'},
+        headers: {..._headers, 'Content-Type': 'application/json'},
         body: jsonEncode(body),
       ),
     );

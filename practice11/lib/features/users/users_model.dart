@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import '../../core/net/api_client.dart';
+import '../../core/api/api_exception.dart';
 import 'user.dart';
 import 'user_repository.dart';
 
@@ -13,26 +13,14 @@ class UsersModel extends ChangeNotifier {
   ApiException? error;
   bool loading = false;
   bool saving = false;
-  bool fromCache = false;
-
-  List<String> get cities => ({
-    for (final u in items)
-      if (u.address.city.isNotEmpty) u.address.city,
-  }.toList()..sort());
 
   Future<void> load() async {
     loading = true;
     error = null;
     notifyListeners();
     try {
-      final r = await _repo.getAll();
-      items = r.items;
-      fromCache = r.fromCache;
+      items = await _repo.getAll();
     } on ApiException catch (e) {
-      if (e is NoConnectionException) {
-        items = const [];
-      }
-      fromCache = false;
       error = e;
     } finally {
       loading = false;
