@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/api/api_exception.dart';
+import '../../core/net/api_client.dart';
+import '../profile/profile_screen.dart';
+import '../settings/settings_model.dart';
+import '../settings/settings_screen.dart';
 import 'user.dart';
 import 'user_detail_screen.dart';
 import 'user_form_screen.dart';
@@ -13,29 +16,64 @@ class UsersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final m = context.watch<UsersModel>();
+    final city = context.select<SettingsModel, String?>((s) => s.city);
+    final shown = [
+      for (final u in m.items)
+        if (city == null || u.address.city == city) u,
+    ];
     return Scaffold(
-      appBar: AppBar(title: const Text('Users')),
+      appBar: AppBar(
+        title: const Text('Users'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const ProfileScreen()),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => const UserFormScreen()),
-        ),
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (_) => const UserFormScreen())),
         child: const Icon(Icons.add),
       ),
-      body: m.loading
-          ? const LoadingView()
-          : RefreshIndicator(
-              onRefresh: m.load,
-              child: switch (m.error) {
-                null => UserList(items: m.items),
-                NoConnectionException() => Offline(onRetry: m.load),
-                NotFoundException() ||
-                UnauthorizedException() =>
-                  const GenericError(),
-                ServerException(:final status) =>
-                  ServerError(status: status, onRetry: m.load),
-                BadResponseException() => const GenericError(),
-              },
+      body: Column(
+        children: [
+          if (m.fromCache)
+            MaterialBanner(
+              content: const Text('Saved data · no connection'),
+              actions: [
+                TextButton(onPressed: m.load, child: const Text('Retry')),
+              ],
             ),
+          Expanded(
+            child: m.loading && m.items.isEmpty
+                ? const LoadingView()
+                : RefreshIndicator(
+                    onRefresh: m.load,
+                    child: switch (m.error) {
+                      null => UserList(items: shown),
+                      NoConnectionException() => Offline(onRetry: m.load),
+                      NotFoundException() ||
+                      UnauthorizedException() => const GenericError(),
+                      ServerException(:final status) => ServerError(
+                        status: status,
+                        onRetry: m.load,
+                      ),
+                      BadResponseException() => const GenericError(),
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -85,11 +123,8 @@ class Offline extends StatelessWidget {
   final VoidCallback onRetry;
 
   @override
-  Widget build(BuildContext context) => _Message(
-        icon: Icons.wifi_off,
-        text: 'No connection',
-        onRetry: onRetry,
-      );
+  Widget build(BuildContext context) =>
+      _Message(icon: Icons.wifi_off, text: 'No connection', onRetry: onRetry);
 }
 
 class ServerError extends StatelessWidget {
@@ -100,20 +135,18 @@ class ServerError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => _Message(
-        icon: Icons.cloud_off,
-        text: 'Server error ($status)',
-        onRetry: onRetry,
-      );
+    icon: Icons.cloud_off,
+    text: 'Server error ($status)',
+    onRetry: onRetry,
+  );
 }
 
 class GenericError extends StatelessWidget {
   const GenericError({super.key});
 
   @override
-  Widget build(BuildContext context) => const _Message(
-        icon: Icons.error_outline,
-        text: 'Something went wrong',
-      );
+  Widget build(BuildContext context) =>
+      const _Message(icon: Icons.error_outline, text: 'Something went wrong');
 }
 
 class UserList extends StatelessWidget {

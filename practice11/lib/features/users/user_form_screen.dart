@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/api/api_exception.dart';
+import '../../core/net/api_client.dart';
 import 'user.dart';
 import 'users_model.dart';
 
